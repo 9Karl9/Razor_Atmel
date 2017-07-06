@@ -14,7 +14,9 @@ All Global variable names shall start with "G_"
 /* New variables */
 volatile u32 G_u32SystemFlags = 0;                     /* Global system flags */
 volatile u32 G_u32ApplicationFlags = 0;                /* Global applications flags: set when application is successfully initialized */
-
+u8 Karl;
+u8 u8DataCheckBit;
+static u16 u16NumBit;
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* External global variables defined in other files (must indicate which file they are defined in) */
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
@@ -39,10 +41,24 @@ contraints but must complete execution regardless of success or failure of start
 the 1ms period.
 ***********************************************************************************************************************/
 
+void Set_Bit(void)
+{
+  u16NumBit|=_Bit3;
+}
+void Clear_Bit(void)
+{
+  u16NumBit&=~_Bit3;
+}
+
 void main(void)
 {
   G_u32SystemFlags |= _SYSTEM_INITIALIZING;
-
+  Karl=0;
+  u8DataCheckBit=0xA5;
+  u16NumBit=0x1234; /*0001 0010 0011 0100
+  DrinkType aeDrink1[]={Empty,Beer};
+  DrinkType aeDrink2[]={Shooter,Wine};
+  
   /* Low level initialization */
   WatchDogSetup(); /* During development, does not reset processor if timeout */
   GpioSetup();
@@ -84,7 +100,10 @@ void main(void)
   while(1)
   {
     WATCHDOG_BONE();
-    
+    Karl++;
+    u8DataCheckBit=u8DataCheckBit<<4;
+    Set_Bit();
+    Clear_Bit();
     /* Drivers */
     LedUpdate();
     ButtonRunActiveState();
