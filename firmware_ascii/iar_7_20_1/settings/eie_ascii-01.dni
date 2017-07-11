@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-1493713038
+Checksum=232671074
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -26,6 +26,7 @@ TraceStallIfFIFOFull=0x00000000
 TracePortSize=0x00000000
 [watch_formats]
 Fmt0={W}3:u16NumBit	1	0
+Fmt1={W}3:u8LedNo	3	0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -37,7 +38,7 @@ LogFile=_ ""
 Enabled=0
 [DriverProfiling]
 Enabled=0
-Mode=1
+Mode=0
 Graph=0
 Symbiont=0
 Exclusions=

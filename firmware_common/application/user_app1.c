@@ -87,6 +87,9 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(RED);
  
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -136,7 +139,64 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+  static u8 u8KeyValue=0;       //The value of each button.
+  static u32 u32Password=0;    //The password.
+ 
+  /*Button0 is the innitialization button.*/
+  if(WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+    u8KeyValue=0;
+    u32Password=0;
+    LedOff(WHITE);
+    LedOff(RED);
+    LedOff(PURPLE);
+  }
 
+  /*When Button1 has been pressed, the value'1' is given to KeyValue and Password is changed. The Red led blinks as well.*/  
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+    u8KeyValue=1;
+    u32Password=10*u32Password+u8KeyValue;
+    LedBlink(RED,LED_8HZ);
+  }
+
+  /*When Button1 has been pressed, the value'1' is given to KeyValue and Password is changed. The Red led blinks as well.*/    
+  if(WasButtonPressed(BUTTON2))
+  {
+    ButtonAcknowledge(BUTTON2);
+    u8KeyValue=2;
+    u32Password=10*u32Password+u8KeyValue;
+    LedBlink(RED,LED_8HZ);
+  }
+
+  /*When Button1 has been pressed, the value'1' is given to KeyValue and Password is changed. The Red led blinks as well.*/  
+  if(WasButtonPressed(BUTTON3))
+  {
+    ButtonAcknowledge(BUTTON3);
+    u8KeyValue=3;
+    u32Password=10*u32Password+u8KeyValue;
+    LedBlink(RED,LED_8HZ);
+  }
+  
+  switch(u32Password)
+  {
+  case 123123:  //If the password is the number'123123', only the White led will be turned on.
+    LedOff(RED);
+    LedOff(PURPLE);
+    LedOn(WHITE);
+    break;
+    
+  default:
+    {
+      if(u32Password>99999)
+      {
+        LedOn(PURPLE);
+      }
+    };   //If the password is wrong, only the Purple led will be turned on.
+    break;
+  }
 } /* end UserApp1SM_Idle() */
     
 

@@ -74,6 +74,7 @@ Promises:
 */
 void UserApp3Initialize(void)
 {
+  LedBlink(YELLOW,LED_1HZ);
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -122,7 +123,22 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp3SM_Idle(void)
 {
-    
+  static u8 u8KeyChoose=0;
+  static u8 u8ChooseHz=0;
+  static LedRateType eaBlinkHz[]={LED_1HZ, LED_2HZ, LED_4HZ, LED_8HZ};
+
+  if(WasButtonPressed(BUTTON2)&&u8ChooseHz!=3)
+  {
+    u8KeyChoose=1;
+    ButtonAcknowledge(BUTTON2);
+  }
+
+  if(u8KeyChoose==1)
+  {
+    LedBlink(YELLOW,eaBlinkHz[++u8ChooseHz]);
+    u8KeyChoose=0;
+  }
+  
 } /* end UserApp3SM_Idle() */
      
 #if 0

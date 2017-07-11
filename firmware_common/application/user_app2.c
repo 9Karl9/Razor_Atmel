@@ -74,6 +74,11 @@ Promises:
 */
 void UserApp2Initialize(void)
 {
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -122,7 +127,54 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp2SM_Idle(void)
 {
+  static u16 u16TimerCounter=0; //Time Counter
+  static u8 u8LedNo=0;          //Led Number          
+  static u16 u16TimeCounterLimit_Ms=2000;       //The whole time period  2000=2s
+
+  /*Start to count time*/
+  u16TimerCounter++;    
+
+  /*Make the leds on in turn and halve the time period*/
+  if(u16TimerCounter==u16TimeCounterLimit_Ms)    
+  {
+    u8LedNo++;
+    u16TimerCounter=0;
+    u16TimeCounterLimit_Ms=u16TimeCounterLimit_Ms/2;
+
+    /*Leds start to be turned on*/
+    switch(u8LedNo)
+    {
+    case 1:     //Set the PWM of the White led
+      LedPWM(WHITE,LED_PWM_100);
+      break;
     
+    case 2:     //Set the PWM of the Purple led
+      LedPWM(PURPLE,LED_PWM_70);
+      break;
+    
+    case 3:     //Set the PWM of the Blue led
+      LedPWM(BLUE,LED_PWM_50);
+      break;
+    
+    case 4:     //Set the PWM of the Cyan led
+      LedPWM(CYAN,LED_PWM_30);
+      break;
+    
+    case 5:     //Set the PWM of the Green led
+      LedPWM(GREEN,LED_PWM_10);
+      break;
+    
+    case 6:     //Initialization all data
+      LedOff(WHITE);
+      LedOff(PURPLE);
+      LedOff(BLUE);
+      LedOff(CYAN);
+      LedOff(GREEN);
+      u8LedNo=0;
+      u16TimeCounterLimit_Ms=2000;
+      break;
+    }
+  }
 } /* end UserApp2SM_Idle() */
      
 #if 0
