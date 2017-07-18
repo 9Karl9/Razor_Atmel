@@ -52,7 +52,8 @@ extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
 
-
+extern u8 G_au8DebugScanfBuffer[];
+extern u8 G_u8DebugScanfCharCount;
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_" and be declared as static.
@@ -87,7 +88,9 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
- 
+	PWMAudioOff(BUZZER1);
+	LCDCommand(LCD_CLEAR_CMD);
+
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -136,7 +139,108 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+	static u8 u8LcdTimeCounter=0;
+	static u8 u8TimeCounter=0;
+	static u8 u8LedNumber=0;
+	static u8 au8MyName[255]="Karl";
+	static u8 u8CursorPosition=LINE1_END_ADDR;
+	static bool bStart=FALSE;
+	
+	u8LcdTimeCounter++;
+	u8TimeCounter++;
+	
+	/*Start Button*/
+	if(WasButtonPressed(BUTTON0))
+	{
+		ButtonAcknowledge(BUTTON0);
+		bStart=TRUE;
+	}
+		
+	/*Pause Button*/
+	if(WasButtonPressed(BUTTON1))
+	{
+		ButtonAcknowledge(BUTTON1);
+		bStart=FALSE;
+	}
+	
+	/*Display the Name*/
+	if(u8LcdTimeCounter==200&&bStart==TRUE)
+	{
+		u8LcdTimeCounter=0;
+		u8CursorPosition--;
+		LCDMessage(u8CursorPosition,au8MyName);
+		LCDClearChars(u8CursorPosition+4,20);
+		
+		if(u8CursorPosition==LINE1_START_ADDR)
+		{
+			u8CursorPosition=LINE1_END_ADDR;
+		}
+	}
+	
+	/*Make the Buzzer ring and leds on in turn*/
+	if(u8TimeCounter==200&&bStart==TRUE)
+	{
+		u8TimeCounter=0;
+		PWMAudioOn(BUZZER1);
+		u8LedNumber++;
+	}
+	
+	switch(u8LedNumber)
+	{
+		case 1:
+			LedOn(WHITE);
+			PWMAudioSetFrequency(BUZZER1,100);
+			break;
+		
+		case 2:
+			LedOff(WHITE);
+			LedOn(PURPLE);
+			PWMAudioSetFrequency(BUZZER1,200);
+			break;
+			
+		case 3:
+			LedOff(PURPLE);
+			LedOn(BLUE);
+			PWMAudioSetFrequency(BUZZER1,300);
+			break;
+			
+		case 4:
+			LedOff(BLUE);
+			LedOn(CYAN);
+			PWMAudioSetFrequency(BUZZER1,400);
+			break;
+			
+		case 5:
+			LedOff(CYAN);
+			LedOn(GREEN);
+			PWMAudioSetFrequency(BUZZER1,500);
+			break;
+			
+		case 6:
+			LedOff(GREEN);
+			LedOn(YELLOW);
+			PWMAudioSetFrequency(BUZZER1,600);
+			break;
+			
+		case 7:
+			LedOff(YELLOW);
+			LedOn(ORANGE);
+			PWMAudioSetFrequency(BUZZER1,700);
+			break;
+			
+		case 8:
+			LedOff(ORANGE);
+			LedOn(RED);
+			PWMAudioSetFrequency(BUZZER1,800);
+			break;
+			
+		case 9:
+			LedOff(RED);
+			PWMAudioSetFrequency(BUZZER1,900);
+			u8LedNumber=0;
+			break;
+	}
+	
 } /* end UserApp1SM_Idle() */
     
 
