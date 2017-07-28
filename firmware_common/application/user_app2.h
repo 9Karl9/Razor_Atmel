@@ -17,7 +17,8 @@ Type Definitions
 /**********************************************************************************************************************
 Constants / Definitions
 **********************************************************************************************************************/
-
+#define USER_INPUT_BUFFER_SIZE (u16)(DEBUG_SCANF_BUFFER_SIZE + 1) /* Sizeof buffer for scanf messages */
+#define NAME "zhuhongjie"
 
 /**********************************************************************************************************************
 Function Declarations
@@ -43,9 +44,8 @@ void UserApp2RunActiveState(void);
 /***********************************************************************************************************************
 State Machine Declarations
 ***********************************************************************************************************************/
-static void UserApp2SM_Idle(void);    
-
-static void UserApp2SM_Error(void);         
+static void UserApp2SM_Idle(void);
+static void UserApp2SM_Error(void);
 static void UserApp2SM_FailedInit(void);        
 
 

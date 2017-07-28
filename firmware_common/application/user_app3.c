@@ -122,7 +122,7 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp3SM_Idle(void)
 {
-    
+
 } /* end UserApp3SM_Idle() */
      
 #if 0
@@ -130,7 +130,7 @@ static void UserApp3SM_Idle(void)
 /* Handle an error */
 static void UserApp3SM_Error(void)          
 {
-  
+
 } /* end UserApp3SM_Error() */
 #endif
 
