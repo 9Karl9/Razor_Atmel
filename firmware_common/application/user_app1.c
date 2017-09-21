@@ -43,7 +43,13 @@ All Global variable names shall start with "G_UserApp1"
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                       /* Global state flags */
 
-
+static u8 u8Index=0;
+static u8 au8Input[256]=NULL;
+static bool bState1=FALSE;
+static bool bState2=FALSE;
+static u16 u16TimeCounter=0;
+static bool bOn1=FALSE;
+static bool bOn2=FALSE;
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
 extern volatile u32 G_u32SystemFlags;                  /* From main.c */
@@ -69,6 +75,54 @@ Function Definitions
 /* Public functions                                                                                                   */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
+/* Initialize all these variables*/
+void Initialize(void)
+{
+	LedOff(RED);
+	LedOff(ORANGE);
+	LedOff(YELLOW);
+	LedOff(GREEN);
+	LedOff(CYAN);
+	LedOff(BLUE);
+	LedOff(PURPLE);
+	LedOff(WHITE);
+	LedOff(LCD_RED);
+	LedOff(LCD_BLUE);
+	LedOff(LCD_GREEN);
+	u16TimeCounter=0;
+	PWMAudioOff(BUZZER1);
+	bState1=FALSE;
+	bState2=FALSE;
+	LCDClearChars(LINE1_START_ADDR,20);
+}
+
+/* Set the Buzzer condition*/
+void BuzzerRings(void)
+{
+	if(bOn1==TRUE)
+	{
+		u16TimeCounter++;
+		
+		if(u16TimeCounter==1000)
+		{
+			u16TimeCounter=0;
+			bOn2=TRUE;
+			PWMAudioOn(BUZZER1);
+		}
+	
+		if(bOn2==TRUE)
+		{
+			PWMAudioSetFrequency(BUZZER1,200);
+	
+			if(u16TimeCounter==100)
+			{
+				PWMAudioOff(BUZZER1);
+				bOn2=FALSE;
+			}
+		
+		}
+	}
+}
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Protected functions                                                                                                */
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -87,7 +141,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
- 
+	UserAPP1_state1();
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -136,7 +190,45 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+	if(DebugScanf(&au8Input[u8Index])>=1) //Judge if the right input
+	{
+		u8Index++;
+		
+		if(au8Input[u8Index-1]=='\r') //Have input "Enter" ?
+		{
+			if((au8Input[u8Index-2]=='1')&&(u8Index==2)) //Input 1?
+			{
+				bState1=TRUE;
+			}
+			
+			if((au8Input[u8Index-2]=='2')&&(u8Index==2)) //Input 2?
+			{
+				bState2=TRUE;
+			}
+			
+			u8Index=0;
+		}
+	}
+	
+	/*Button1 pressed or 1 input, then go to UserAPP1_state1*/
+	if(WasButtonPressed(BUTTON1)||bState1)
+	{
+		ButtonAcknowledge(BUTTON1);
+		DebugLineFeed();
+		Initialize();
+		UserApp1_StateMachine=UserAPP1_state1;
+	}
+	
+	/*Button2 pressed or 3 input, then go to UserAPP1_state2*/
+	if(WasButtonPressed(BUTTON2)||bState2)
+	{
+		ButtonAcknowledge(BUTTON2);
+		DebugLineFeed();
+		Initialize();
+		UserApp1_StateMachine=UserAPP1_state2;
+	}
 
+	BuzzerRings();
 } /* end UserApp1SM_Idle() */
     
 
@@ -147,7 +239,62 @@ static void UserApp1SM_Error(void)
   
 } /* end UserApp1SM_Error() */
 
+static void UserAPP1_state1(void)
+{
+	/*Display "Entering state 1" on the PC screen*/
+	DebugPrintf("Entering state 1");
+	DebugLineFeed();
+	Initialize();
+	
+	/*Display " STATE 1" on the LCD*/
+	LCDMessage(LINE1_START_ADDR,"STATE 1");
+	
+	/*Set the Leds*/
+	LedOn(WHITE);
+	LedOn(PURPLE);
+	LedOn(BLUE);
+	LedOn(CYAN);
+	
+	/*Set the LCD Backlight*/
+	LedPWM(LCD_RED,LED_PWM_100);
+	LedPWM(LCD_BLUE,LED_PWM_100);
+	
+	/*Set the Buzzer*/
+	PWMAudioOff(BUZZER1);
+	bOn1=FALSE;
+	
+	/*Go back to UserApp1SM_Idle*/
+	UserApp1_StateMachine=UserApp1SM_Idle;
+}
 
+static void UserAPP1_state2(void)
+{
+	/*Display "Entering state 2" on the PC screen*/
+	DebugPrintf("Entering state 2");
+	DebugLineFeed();
+	Initialize();
+	
+	/*Display " STATE 1" on the LCD*/
+	LCDMessage(LINE1_START_ADDR,"STATE 2");
+	
+	/*Set the Leds*/
+	LedBlink(GREEN,LED_1HZ);
+	LedBlink(YELLOW,LED_2HZ);
+	LedBlink(ORANGE,LED_4HZ);
+	LedBlink(RED,LED_8HZ);
+	
+	/*Set the LCD Backlight*/
+	LedPWM(LCD_RED,LED_PWM_100);
+	LedPWM(LCD_GREEN,LED_PWM_20);
+	
+	/*Set the Buzzer*/
+	PWMAudioOn(BUZZER1);
+	bOn1=TRUE;
+	bOn2=TRUE;
+	
+	/*Go back to UserApp1SM_Idle*/
+	UserApp1_StateMachine=UserApp1SM_Idle;
+}
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* End of File                                                                                                        */
