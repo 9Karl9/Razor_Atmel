@@ -764,7 +764,7 @@ bool AntTxMessage(u8 *pu8AntTxMessage_)
 {
   u8 u8Byte;
   u32 u32Length;
-  u32 u32TimeOut = G_u32SystemTime1s;
+  //u32 u32TimeOut = G_u32SystemTime1s;
   u8 au8TxInProgressMsg[] = "AntTx: msg already in progress\n\r";
   u8 au8TxTimeoutMsg[]    = "AntTx: SEN timeout\n\r";
   u8 au8TxNoTokenMsg[]    = "AntTx: No token\n\r";
@@ -773,7 +773,7 @@ bool AntTxMessage(u8 *pu8AntTxMessage_)
   /* Check G_u32AntFlags first */
   if(G_u32AntFlags & (_ANT_FLAGS_TX_IN_PROGRESS | _ANT_FLAGS_RX_IN_PROGRESS) )
   {
-    DebugPrintf(au8TxInProgressMsg);
+    //DebugPrintf(au8TxInProgressMsg);
     return FALSE;
   }
   
