@@ -136,7 +136,39 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+	static u32 u32ButtonValue = PA_17_BUTTON0;
+	static u32 u32LedValue1 = PB_20_LED_RED;
+	static u32 u32LedValue2 = PB_19_LED_GRN;
+	
+	static u32 u32ButtonRegisterStatus;
+	static u32 u32SetLedStatus;
+	static u8 u8TimeCounter= 0;
+	static bool bLedOn=FALSE;
+	
+	u32ButtonRegisterStatus = AT91C_BASE_PIOA->PIO_PDSR&u32ButtonValue;
+	u32SetLedStatus = u32LedValue1 | u32LedValue2;
+	
+	if(!u32ButtonRegisterStatus)			//Pressed
+	{
+		u8TimeCounter++;
+		
+		if(u8TimeCounter==200)					//Delay
+		{
+			u8TimeCounter = 0;
+			bLedOn = !bLedOn;
+		}
+		
+		if( bLedOn==TRUE )
+		{
+			AT91C_BASE_PIOB->PIO_ODSR &= (~u32SetLedStatus);
+		}
+		
+		else
+		{
+			AT91C_BASE_PIOB->PIO_ODSR |= u32SetLedStatus;
+		}
+	}
+	
 } /* end UserApp1SM_Idle() */
     
 
