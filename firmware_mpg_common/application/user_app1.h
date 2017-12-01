@@ -31,13 +31,18 @@ Constants / Definitions
 /* Required constants for ANT channel configuration */
 #define ANT_CHANNEL_USERAPP             ANT_CHANNEL_0         /* Channel 0 - 7 */
 #define ANT_CHANNEL_TYPE_USERAPP        CHANNEL_TYPE_SLAVE    /* ANT SLAVE */
-#define ANT_DEVICEID_LO_USERAPP         (u8)0                 /* Low byte of two-byte Device # */
-#define ANT_DEVICEID_HI_USERAPP         (u8)0                 /* High byte of two-byte Device # */
-#define ANT_DEVICE_TYPE_USERAPP         (u8)0                 /* 1 - 255 */
-#define ANT_TRANSMISSION_TYPE_USERAPP   (u8)0                 /* 1-127 (MSB is pairing bit) */
-#define ANT_CHANNEL_PERIOD_LO_USERAPP   (u8)0x00              /* Low byte of two-byte channel period 0x0001 - 0x7fff */
-#define ANT_CHANNEL_PERIOD_HI_USERAPP   (u8)0x20              /* High byte of two-byte channel period */
-#define ANT_FREQUENCY_USERAPP           (u8)50                /* 2400MHz + this number 0 - 99 */
+
+#define ANT_DEVICEID_DEC_USERAPP        (u8)1381
+#define ANT_DEVICEID_LO_USERAPP         (u8)0x65                 /* Low byte of two-byte Device # */
+#define ANT_DEVICEID_HI_USERAPP         (u8)0x05                 /* High byte of two-byte Device # */
+#define ANT_DEVICE_TYPE_USERAPP         (u8)120                 /* 1 - 255 */
+#define ANT_TRANSMISSION_TYPE_USERAPP   (u8)1                 /* 1-127 (MSB is pairing bit) */
+
+#define ANT_CHANNEL_PERIOD_DEC_USERAPP  (u16)8070
+#define ANT_CHANNEL_PERIOD_HEX_USERAPP  (u16)0x1F86
+#define ANT_CHANNEL_PERIOD_LO_USERAPP   (u8)0x86              /* Low byte of two-byte channel period 0x0001 - 0x7fff */
+#define ANT_CHANNEL_PERIOD_HI_USERAPP   (u8)0x1F              /* High byte of two-byte channel period */
+#define ANT_FREQUENCY_USERAPP           (u8)57                /* 2400MHz + this number 0 - 99 */
 #define ANT_TX_POWER_USERAPP            RADIO_TX_POWER_4DBM   /* RADIO_TX_POWER_0DBM, RADIO_TX_POWER_MINUS5DBM, RADIO_TX_POWER_MINUS10DBM, RADIO_TX_POWER_MINUS20DBM */
 
 #define TIMEOUT_VALUE                   (u32)2000             /* Maximum allowed timeout value for any transition state */
@@ -65,7 +70,7 @@ void UserApp1RunActiveState(void);
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
+static void DebugHR(u8);
 
 /***********************************************************************************************************************
 State Machine Declarations
