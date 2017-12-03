@@ -87,67 +87,67 @@ static void DebugHR( u8 u8HeartRate )
 	}
 	else if(u8HeartRate < 60)
 	{
-		DebugPrintf("*****\r\n");
+		DebugPrintf("    -\r\n");
 	}
 	else if(u8HeartRate < 70)
 	{
-		DebugPrintf("******\r\n");
+		DebugPrintf("     -\r\n");
 	}
 	else if(u8HeartRate < 80)
 	{
-		DebugPrintf("*******\r\n");
+		DebugPrintf("      -\r\n");
 	}
 	else if(u8HeartRate < 90)
 	{
-		DebugPrintf("********\r\n");
+		DebugPrintf("       -\r\n");
 	}
 	else if(u8HeartRate < 100)
 	{
-		DebugPrintf("*********\r\n");
+		DebugPrintf("        -\r\n");
 	}
 	else if(u8HeartRate < 110)
 	{
-		DebugPrintf("**********\r\n");
+		DebugPrintf("         -\r\n");
 	}
 	else if(u8HeartRate < 120)
 	{
-		DebugPrintf("***********\r\n");
+		DebugPrintf("          -\r\n");
 	}
 	else if(u8HeartRate < 130)
 	{
-		DebugPrintf("************\r\n");
+		DebugPrintf("           -\r\n");
 	}
 	else if(u8HeartRate < 140)
 	{
-		DebugPrintf("*************\r\n");
+		DebugPrintf("            -\r\n");
 	}
 	else if(u8HeartRate < 150)
 	{
-		DebugPrintf("**************\r\n");
+		DebugPrintf("             -\r\n");
 	}
 	else if(u8HeartRate < 160)
 	{
-		DebugPrintf("***************\r\n");
+		DebugPrintf("              -\r\n");
 	}
 	else if(u8HeartRate < 170)
 	{
-		DebugPrintf("****************\r\n");
+		DebugPrintf("               -\r\n");
 	}
 	else if(u8HeartRate < 180)
 	{
-		DebugPrintf("*****************\r\n");
+		DebugPrintf("                -\r\n");
 	}
 	else if(u8HeartRate < 190)
 	{
-		DebugPrintf("******************\r\n");
+		DebugPrintf("                 -\r\n");
 	}
 	else if(u8HeartRate < 200)
 	{
-		DebugPrintf("*******************\r\n");
+		DebugPrintf("                  -\r\n");
 	}
 	else
 	{
-		DebugPrintf("********************\r\n");
+		DebugPrintf("                   -\r\n");
 	}
 }
 
@@ -379,6 +379,7 @@ static void UserApp1SM_ChannelOpen(void)
     UserApp1_StateMachine = UserApp1SM_WaitChannelClose;
   } /* end if(WasButtonPressed(BUTTON0)) */
   
+	/* Switch the Buzzer */
 	if( WasButtonPressed(BUTTON1) )
 	{
 		ButtonAcknowledge(BUTTON1);
@@ -411,7 +412,8 @@ static void UserApp1SM_ChannelOpen(void)
       {
         AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8TestMessage);
 				
-				if(u8HeartRate!=G_au8AntApiCurrentMessageBytes[7])		//Check if the HR changes and display present HR
+				/* Check if the HR changes and display present HR & average HR*/
+				if(u8HeartRate!=G_au8AntApiCurrentMessageBytes[7])		
 				{
 					u8HeartRate=G_au8AntApiCurrentMessageBytes[7];
 					u16HRSum+=u8HeartRate;
@@ -475,16 +477,18 @@ static void UserApp1SM_ChannelOpen(void)
 						PWMAudioSetFrequency(BUZZER1,1000);
 					}
 					
+					/* Recalculate the average heart, in case sum of the HR overflows */
 					if(u8HBCount==200)
 					{
 						u8HBCount=0;
 						u16HRSum=u8AverageHR;
 					}
-				} /* end if(u8HeartRate!=G_au8AntApiCurrentMessageBytes[7])*/
+				} /* end if(u8HeartRate!=G_au8AntApiCurrentMessageBytes[7]) */
 				
 				LedOff(WHITE);
 				PWMAudioOff(BUZZER1);
 				
+				/*Check if the HB changes and buzzer settings*/
 				if( u8HeartBeat!=G_au8AntApiCurrentMessageBytes[6] )
 				{
 					u8HeartBeat=G_au8AntApiCurrentMessageBytes[6];
@@ -508,11 +512,13 @@ static void UserApp1SM_ChannelOpen(void)
 							PWMAudioSetFrequency(BUZZER1,1000);
 							PWMAudioOn(BUZZER1);
 						}
-					}
-				}
+					}/* end if(bBuzzerOn) */
+				}/* end if(u8HeartBeat!=G_au8AntApiCurrentMessageBytes[6]) */
 				
+				/* Debug outputs drawings of heart rate*/
 				DebugHR(u8HeartRate);
-      } /* end if(bGotNewData) */
+      
+			} /* end if(bGotNewData) */
     } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
     
     else if(G_eAntApiCurrentMessageClass == ANT_TICK)
