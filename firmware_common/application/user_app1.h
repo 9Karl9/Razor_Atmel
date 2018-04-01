@@ -37,7 +37,8 @@ Function Declarations
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Public functions                                                                                                   */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
+void LedAllOff(void);
+void LedAllOn(void);
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Protected functions                                                                                                */
@@ -55,7 +56,10 @@ void UserApp1RunActiveState(void);
 State Machine Declarations
 ***********************************************************************************************************************/
 static void UserApp1SM_Idle(void);    
-
+static void UserApp1SM_VolumeUp(void);
+static void UserApp1SM_VolumeDown(void);
+//static void UserApp1SM_Test(void);
+static void UserApp1SM_ModeChange(void);
 static void UserApp1SM_Error(void);         
 
 

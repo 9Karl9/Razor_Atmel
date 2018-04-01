@@ -69,6 +69,36 @@ Function Definitions
 /* Public functions                                                                                                   */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
+static void LedAllOff(void)
+{
+	LedOff(RED);
+	LedOff(ORANGE);
+	LedOff(YELLOW);
+	LedOff(GREEN);
+	LedOff(CYAN);
+	LedOff(BLUE);
+	LedOff(PURPLE);
+	LedOff(WHITE);
+}
+
+static void LedAllOn(void)
+{
+	LedOn(RED);
+	LedOn(ORANGE);
+	LedOn(YELLOW);
+	LedOn(GREEN);
+	LedOn(CYAN);
+	LedOn(BLUE);
+	LedOn(PURPLE);
+	LedOn(WHITE);
+}
+
+static void Delay(u32 u32DelayTime)
+{
+	for(u32 i = u32DelayTime;i>0;i--)
+	{
+	}
+}
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Protected functions                                                                                                */
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -87,7 +117,45 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
- 
+ 	/* Initialize Leds */
+	LedAllOff();
+	LedOn(WHITE);
+	
+	/* Initialize LCD */
+	LCDCommand(LCD_CLEAR_CMD);
+	LCDMessage(LINE1_START_ADDR,"Channel:MUTE");
+	//LCDMessage(LINE2_START_ADDR,"");
+	
+	/* Enable PIO */
+	AT91C_BASE_PIOA->PIO_PER |= 0x00015800;
+	AT91C_BASE_PIOA->PIO_OER |= 0x00015800;
+	AT91C_BASE_PIOB->PIO_PER |= 0x00000010;
+	AT91C_BASE_PIOB->PIO_OER |= 0x00000010;
+	
+	/* Pins Table */
+	/* Controlled Broad | Control Broad | Address 			*/
+	/*        AD 				|				AN0			|	0x00000010		*/
+	/* 				A					|				AN1			|	0x00000008		*/
+	/* 				B					|			RX/UPIMO	|	0x00000800		*/
+	/* 				C				|			TX/UPOMI		|	0x00001000		*/
+	/* 				INC				|			 MOSI			|	0x00004000	  */
+	/* 				UD				|			 MISO			|	0x00002000		*/
+	/* 				CS				|       SCK			|	0x00008000		*/
+	/* 				RE				|				CS			|	0x00010000		*/
+	
+	/* Set Pins */
+	AT91C_BASE_PIOB->PIO_CODR = PB_03_BLADE_AN0;
+	AT91C_BASE_PIOB->PIO_CODR = PB_04_BLADE_AN1;
+	AT91C_BASE_PIOA->PIO_SODR = PA_11_BLADE_UPIMO;
+	AT91C_BASE_PIOA->PIO_CODR = PA_12_BLADE_UPOMI;
+	AT91C_BASE_PIOA->PIO_CODR = PA_14_BLADE_MOSI;
+	AT91C_BASE_PIOA->PIO_CODR = PA_13_BLADE_MISO;
+	AT91C_BASE_PIOA->PIO_SODR = PA_15_BLADE_SCK;
+	AT91C_BASE_PIOA->PIO_CODR = PA_16_BLADE_CS;
+	
+	/* Set Pins */
+	
+	
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -136,10 +204,169 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+	static bool bPressed = FALSE;
 
+	if( WasButtonPressed(BUTTON0) )
+	{
+		ButtonAcknowledge(BUTTON0);
+		bPressed = TRUE;
+		
+		UserApp1_StateMachine = UserApp1SM_VolumeUp;
+	}
+	
+	if( WasButtonPressed(BUTTON1) )
+	{
+		ButtonAcknowledge(BUTTON1);
+		bPressed = TRUE;
+		
+		UserApp1_StateMachine = UserApp1SM_VolumeDown;
+	}
+	
+		if( WasButtonPressed(BUTTON2) )
+	{
+		ButtonAcknowledge(BUTTON2);
+		bPressed = TRUE;
+		
+		//UserApp1_StateMachine = UserApp1SM_Test;
+	}
+	
+	if( WasButtonPressed(BUTTON3) )
+	{
+		ButtonAcknowledge(BUTTON3);
+		bPressed = TRUE;
+
+		UserApp1_StateMachine = UserApp1SM_ModeChange;
+	}
+	
+	if(bPressed)
+	{
+		bPressed=FALSE;
+		
+		LedOn(GREEN);
+		Delay(50000);
+		LedOff(GREEN);
+	}
 } /* end UserApp1SM_Idle() */
     
+static void UserApp1SM_VolumeUp(void)
+{
+	/* Set Wiper Up */
+	AT91C_BASE_PIOA->PIO_CODR = PA_15_BLADE_SCK;
+	AT91C_BASE_PIOA->PIO_SODR = PA_13_BLADE_MISO;
+	
+	Delay(5);
+	
+	/* Change INC from High to Low */
+	AT91C_BASE_PIOA->PIO_SODR = PA_14_BLADE_MOSI;
+	Delay(5);
+	AT91C_BASE_PIOA->PIO_CODR = PA_14_BLADE_MOSI;
+	Delay(5);
+	
+	/* Store Wiper Position */
+	AT91C_BASE_PIOA->PIO_SODR = PA_15_BLADE_SCK;
+	Delay(5);
+	AT91C_BASE_PIOA->PIO_SODR = PA_14_BLADE_MOSI;
+	
+	UserApp1_StateMachine = UserApp1SM_Idle;
+}
 
+static void UserApp1SM_VolumeDown(void)
+{
+	/* Set Wiper Down */
+	AT91C_BASE_PIOA->PIO_CODR = PA_15_BLADE_SCK;
+	AT91C_BASE_PIOA->PIO_CODR = PA_13_BLADE_MISO;
+	
+	Delay(5);
+	
+	/* Change INC from High to Low */
+	AT91C_BASE_PIOA->PIO_SODR = PA_14_BLADE_MOSI;
+	Delay(5);
+	AT91C_BASE_PIOA->PIO_CODR = PA_14_BLADE_MOSI;
+	Delay(5);
+	
+	/* Store Wiper Position */
+	AT91C_BASE_PIOA->PIO_SODR = PA_15_BLADE_SCK;
+	Delay(5);
+	AT91C_BASE_PIOA->PIO_SODR = PA_14_BLADE_MOSI;
+	
+	UserApp1_StateMachine = UserApp1SM_Idle;
+}
+
+/*static void UserApp1SM_Test(void);
+{
+	
+}
+*/
+static void UserApp1SM_ModeChange(void)
+{
+	static u8 u8Mode = 1;
+	/* Mode Description 										*/
+	/* Mode 0 : Mute 					White Led On	*/
+	/* Mode 1 : MIC Signal 		Purple Led On	*/
+	/* Mode 2 : Phone Signal  Blue Led On		*/
+	
+	if(u8Mode==3)
+	{
+		u8Mode=0;
+	}
+	
+	switch(u8Mode)
+	{
+		case 0:
+		{
+			AT91C_BASE_PIOB->PIO_SODR = PA_11_BLADE_UPIMO;
+			
+			LedOff(BLUE);
+			LedOn(WHITE);
+			
+			LCDCommand(LCD_CLEAR_CMD);
+			LCDMessage(LINE1_START_ADDR,"Channel:MUTE");
+			
+			break;
+		}
+		case 1:
+		{
+			AT91C_BASE_PIOB->PIO_SODR = PB_04_BLADE_AN1;
+			AT91C_BASE_PIOB->PIO_CODR = PA_11_BLADE_UPIMO;
+			AT91C_BASE_PIOA->PIO_CODR = PA_12_BLADE_UPOMI;
+			
+			LedOff(WHITE);
+			LedOn(PURPLE);
+			
+			LCDCommand(LCD_CLEAR_CMD);
+			LCDMessage(LINE1_START_ADDR,"Channel:MIC");
+			
+			break;
+		}
+		case 2:
+		{
+			AT91C_BASE_PIOB->PIO_CODR = PB_04_BLADE_AN1;
+			AT91C_BASE_PIOB->PIO_CODR = PA_11_BLADE_UPIMO;
+			AT91C_BASE_PIOA->PIO_CODR = PA_12_BLADE_UPOMI;
+			
+			LedOff(PURPLE);
+			LedOn(BLUE);
+			
+			LCDCommand(LCD_CLEAR_CMD);
+			LCDMessage(LINE1_START_ADDR,"Channel:PHONE");
+			
+			break;
+		}
+		
+		default:
+		{
+			LedBlink(RED,LED_4HZ);
+			
+			UserApp1_StateMachine = UserApp1SM_Error;
+			
+			break;
+		}
+	}
+
+	u8Mode++;
+
+	UserApp1_StateMachine = UserApp1SM_Idle;
+}
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
 static void UserApp1SM_Error(void)          
